@@ -10,19 +10,71 @@ app.use(cors());
 const users = [];
 
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers;
+
+  const user = users.find(item => item.username === username);
+
+  if(!user){
+    return response.status(404).json({ error: 'Mensagem de erro' });
+  }
+
+  request.user = user;
+
+  next();
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+  const user = request.user;
+
+  if(user.todos.length >= 10 && user.pro === false){
+    return response.status(403).json({ error: 'Mensagem de erro' });
+  }
+
+  next()
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+  const todoId = request.params.id;
+  const { username } = request.headers;
+
+  if(validate(todoId) === false){
+    return response.status(400).json({ error: 'Mensagem de erro' });
+  }
+
+  const user = users.find(item => item.username === username);
+
+  if(!user){
+    return response.status(404).json({ error: 'Mensagem de erro' });
+  }
+
+  const todo = user.todos.find(item => item.id === todoId);
+
+  if(!todo){
+    return response.status(404).json({ error: 'Mensagem de erro' });
+  }
+
+  request.user = user;
+  request.todo = todo;
+
+  next();
 }
 
 function findUserById(request, response, next) {
-  // Complete aqui
+  const userId = request.params.id;
+
+  if(validate(userId) === false){
+    return response.status(404).json({ error: 'Mensagem de erro' });
+  }
+
+  const user = users.find(item => item.id === userId);
+
+  if(!user){
+    return response.status(404).json({ error: 'Mensagem de erro' });
+  }
+
+  request.user = user;
+
+  next();
 }
 
 app.post('/users', (request, response) => {
